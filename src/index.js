@@ -20,13 +20,19 @@ client.once("ready", async () => {
   logger.info(`\n${client.user.username}|${client.user.id} is ready!\n\n`);
 
   cron.schedule(pattern, async () => {
-    config.channelIds.forEach(async (item) => {
+    config.channelIds.forEach(async (item, index) => {
       try {
         const channel = client.channels.cache.get(item);
-        await channel.send(message.toString());
-        logger.info(
-          `\nserver: ${channel.guild}\nchannel: ${channel}|${channel.id}\n\n`
-        );
+        if (!channel) {
+          throw new Error(`Channel with ID ${item} not found.`);
+        }
+
+        setTimeout(async () => {
+          await channel.send(message.toString());
+          logger.info(
+            `\nserver: ${channel.guild}\nchannel: ${channel.name}|${channel.id}\n\n`
+          );
+        }, index * 5000);
       } catch (error) {
         logger.error(`\n${error}\n\n`);
       }

@@ -1,43 +1,42 @@
-import { Client } from "discord.js-selfbot-v13";
-import friendlyCron from "friendly-cron";
-import cron from "node-cron";
 import fs from "fs";
 import "dotenv/config";
-import logger from "./util/logger.js";
-import config from "../config/config.json" assert { type: "json" };
 
-const client = new Client();
+import Config from "./configs/config.js";
+import PromotionRepository from "./repositories/promotion.js";
+import PromotionService from "./services/promotion.js";
 
-const message = fs.readFileSync("./config/message.txt", {
-  encoding: "utf8",
-  flag: "r",
-});
+const config = new Config();
+const bot = config.bot();
+const db = config.db();
 
-const pattern = friendlyCron("every 2 hour");
+const promotionRepository = new PromotionRepository(db);
+const promotionService = new PromotionService(promotionRepository, bot);
 
-client.once("ready", async () => {
-  console.clear();
-  logger.info(`\n${client.user.username}|${client.user.id} is ready!\n\n`);
+bot.client.commands = new Map();
+bot.service = promotionService;
 
-  cron.schedule(pattern, async () => {
-    config.channelIds.forEach(async (item, index) => {
-      try {
-        const channel = client.channels.cache.get(item);
-        if (!channel) {
-          throw new Error(`Channel with ID ${item} not found.`);
-        }
+const importEvent = async (file) => {
+  const event = (await import(`./events/${file}`)).default;
+  bot.client.on(file.split(".")[0], (...args) => event(bot, ...args));
+};
 
-        setTimeout(async () => {
-          await channel.send(message.toString());
-          logger.info(
-            `\nserver: ${channel.guild}\nchannel: ${channel.name}|${channel.id}\n\n`
-          );
-        }, index * 5000);
-      } catch (error) {
-        logger.error(`\n${error}\n\n`);
-      }
-    });
-  });
-});
+const importCommand = async (file) => {
+  const command = (await import(`./commands/${file}`)).default;
+  bot.client.commands.set(command.name, command);
+};
 
-client.login(process.env.BOT_TOKEN);
+const importFiles = async (directory, importFunction) => {
+  const files = fs.readdirSync(directory);
+
+  const jsFiles = files.filter((file) => file.endsWith(".js"));
+
+  for (const file of jsFiles) {
+    await importFunction(file);
+  }
+};
+
+(async () => {
+  await importFiles("./src/events", importEvent);
+  await importFiles("./src/commands", importCommand);
+  await bot.client.login(bot.token);
+})();

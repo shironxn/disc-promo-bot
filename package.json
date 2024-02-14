@@ -6,16 +6,21 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon ./src/index"
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@supabase/supabase-js": "^2.39.3",
     "discord.js-selfbot-v13": "^3.1.4",
     "dotenv": "^16.4.1",
     "friendly-cron": "^0.0.2",
     "node-cron": "^3.0.3",
     "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
   }
 }

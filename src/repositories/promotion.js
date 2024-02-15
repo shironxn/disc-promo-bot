@@ -13,18 +13,18 @@ class PromotionRepository {
     const { data, error } = await this.db
       .from("promotion")
       .insert(entity)
-      .select();
+      .select()
+      .single();
     if (error) {
-      throw new Error(error.message);
+      throw error.message;
     }
-    console.log(data);
     return data;
   }
 
   async getAll() {
     const { data, error } = await this.db.from("promotion").select();
     if (error) {
-      throw new Error(error.message);
+      throw error.message;
     }
     return data;
   }
@@ -33,9 +33,10 @@ class PromotionRepository {
     const { data, error } = await this.db
       .from("promotion")
       .select()
-      .eq("id", id);
+      .eq("id", id)
+      .single();
     if (error) {
-      throw new Error(error.message);
+      throw error.message;
     }
     return data;
   }
@@ -45,9 +46,10 @@ class PromotionRepository {
       .from("promotion")
       .update(entity)
       .eq("id", id)
-      .select();
+      .select()
+      .single();
     if (error) {
-      throw new Error(error.message);
+      throw error.message;
     }
     return data;
   }
@@ -55,7 +57,7 @@ class PromotionRepository {
   async delete(id) {
     const { error } = await this.db.from("promotion").delete().eq("id", id);
     if (error) {
-      throw new Error(error.message);
+      throw error.message;
     }
   }
 }

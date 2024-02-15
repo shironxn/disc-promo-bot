@@ -2,14 +2,20 @@ import sendEmbed from "../utils/embed.js";
 
 export default {
   name: "create",
+  params: ["name"],
   description: "create a new promotion",
   execute: async (bot, message, args) => {
-    try {
-      const data = await bot.service.createPromotion({ name: args.join(" ") });
-      const promotionInfo = `successfully created a new promotion\nid: ${data[0].id} | name: ${data[0].name}`;
-      sendEmbed(message, promotionInfo);
-    } catch (error) {
-      throw new Error(error);
-    }
+    const data = await bot.service.createPromotion({ name: args.join(" ") });
+
+    sendEmbed(
+      message,
+      `successfully created a new promotion. use '${
+        bot.prefix
+      }set' to configure the promotion\n\npromotion details:\n${JSON.stringify(
+        data,
+        null,
+        2
+      )}`
+    );
   },
 };

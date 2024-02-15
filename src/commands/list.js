@@ -2,23 +2,22 @@ import sendEmbed from "../utils/embed.js";
 
 export default {
   name: "list",
-  description: "setup promotion",
+  description: "retrieve information about promotions",
   execute: async (bot, message, args) => {
-    try {
-      if (args.length !== 0) {
-        const data = await bot.service.getPromotionById(args[0]);
-        message.reply(JSON.stringify(data[0], null, 2));
-        return;
-      }
+    const dataList = [];
 
-      let description = "";
-      const data = await bot.service.getAllPromotion();
-      data.forEach((item) => {
-        description += `id: ${item.id}\nname: ${item.name}\ncreated_at: ${item.created_at}\n\n`;
+    const data = await bot.service.getAllPromotion();
+    data.forEach((item) => {
+      dataList.push({
+        id: item.id,
+        name: item.name,
+        created_at: item.created_at,
       });
-      sendEmbed(message, description);
-    } catch (error) {
-      throw new Error(error);
-    }
+    });
+
+    const description =
+      "```json\n" + JSON.stringify(dataList, null, 2) + "\n```";
+    message.reply(description);
+    sendEmbed(message, `current promotion data: ${data.length}`);
   },
 };

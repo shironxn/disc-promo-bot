@@ -2,26 +2,22 @@ import sendEmbed from "../utils/embed.js";
 
 export default {
   name: "stop",
-  description: "setup promotion",
+  params: ["id?"],
+  description: "stop a promotion",
   execute: async (bot, message, args) => {
-    try {
-      if (args.length !== 0) {
-        const data = await bot.service.getPromotionById(args[0]);
-        await bot.service.stopPromotion(data[0]);
-        sendEmbed(message, `stop promotion with id: ${data[0].id}`);
-        return;
-      }
-
-      const data = await bot.service.getAllPromotion();
-      data.forEach(async (item) => {
-        await bot.service.stopPromotion(item);
-      });
-      sendEmbed(
-        message,
-        `stop promotion with id: ${data.map((item) => item.id)}`
-      );
-    } catch (error) {
-      throw new Error(error);
+    if (args.length !== 0) {
+      await bot.service.stopPromotion(args[0]);
+      sendEmbed(message, `stopped promotion with id: ${args[0]}`);
+      return;
     }
+
+    const data = await bot.service.getAllPromotion();
+    data.forEach(async (item) => {
+      await bot.service.stopPromotion(item.id);
+    });
+    sendEmbed(
+      message,
+      `stopped promotion with id: ${data.map((item) => item.id)}`
+    );
   },
 };

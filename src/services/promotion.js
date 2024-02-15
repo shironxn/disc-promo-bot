@@ -8,90 +8,109 @@ class PromotionService {
     this.cronJobs = {};
   }
 
-  async createPromotion(args) {
-    try {
-      return await this.repository.create(args);
-    } catch (error) {
-      throw new Error(`failed to create promotion: ${error}`);
+  async createPromotion(promotionData) {
+    const data = await this.repository.create(promotionData);
+    if (!data) {
+      throw new Error("failed to create promotion");
     }
+    return data;
   }
 
   async getAllPromotion() {
-    try {
-      return await this.repository.getAll();
-    } catch (error) {
-      throw new Error(`failed to get promotions: ${error}`);
+    const data = await this.repository.getAll();
+    if (!data) {
+      throw new Error("failed to get all promotions");
     }
+    return data;
   }
 
-  async getPromotionById(args) {
-    try {
-      return await this.repository.getById(args);
-    } catch (error) {
-      throw new Error(`failed to get promotion by id: ${error}`);
+  async getPromotionById(promotionId) {
+    const data = await this.repository.getById(promotionId);
+    if (!data) {
+      throw new Error(`promotion with id ${promotionId} not found`);
     }
+    return data;
   }
 
-  async updatePromotion(args) {
-    const [action, id, ...value] = args;
-
+  async updatePromotion(updateData) {
+    const [action, id, ...value] = updateData;
     switch (action) {
       case "name":
       case "message":
+        const updatedData = await this.repository.update(
+          { [action]: value.join(" ") },
+          id
+        );
+        if (!updatedData) {
+          throw new Error(`failed to update promotion with id ${id}`);
+        }
+        return updatedData;
       case "delay":
       case "interval":
-        try {
-          return await this.repository.update(
-            { [action]: value.join(" ") },
-            id
+        const numericValue = parseInt(value[0]);
+        if (isNaN(numericValue) || numericValue <= 0) {
+          throw new Error(
+            `${action} must be a positive number starting from 1`
           );
-        } catch (error) {
-          throw new Error(`failed to update promotion: ${error}`);
         }
+        const updatedNumericData = await this.repository.update(
+          { [action]: value.join(" ") },
+          id
+        );
+        if (!updatedNumericData) {
+          throw new Error(`failed to update promotion with id ${id}`);
+        }
+        return updatedNumericData;
       case "channel_id":
-        try {
-          return await this.repository.update({ [action]: value }, id);
-        } catch (error) {
-          throw new Error(`failed to update promotion: ${error}`);
+        const updatedChannelData = await this.repository.update(
+          { [action]: value },
+          id
+        );
+        if (!updatedChannelData) {
+          throw new Error(`failed to update promotion with id ${id}`);
         }
+        return updatedChannelData;
       default:
-        throw new Error("invalid action provided");
+        throw new Error(
+          "invalid action provided\nusage: [name, message, delay, interval, channel_id]"
+        );
     }
   }
 
-  async deletePromotion(args) {
-    try {
-      return await this.repository.delete(args);
-    } catch (error) {
-      throw new Error(`failed to delete promotion: ${error}`);
+  async deletePromotion(promotionId) {
+    const deletedData = await this.repository.delete(promotionId);
+    if (!deletedData) {
+      throw new Error(`failed to delete promotion with id ${promotionId}`);
     }
+    return deletedData;
   }
 
-  async startPromotion(args) {
+  async startPromotion(promotionData) {
     try {
-      const cronPattern = friendlyCron(this.calculateCronPattern(args.delay));
+      const cronPattern = friendlyCron(
+        this.calculateCronPattern(promotionData.delay)
+      );
       const cronJob = cron.schedule(cronPattern, async () => {
-        await this.processPromotion(args);
+        await this.processPromotion(promotionData);
       });
 
-      this.cronJobs[args.id] = cronJob;
+      this.cronJobs[promotionData.id] = cronJob;
     } catch (error) {
-      throw new Error("error starting promotions scheduler:", error);
+      throw new Error(`error starting promotions scheduler: ${error}`);
     }
   }
 
-  async stopPromotion(args) {
-    try {
-      const cronJob = this.cronJobs[args.id];
-      console.log(this.cronJobs);
-      if (cronJob === undefined) {
-        throw new Error(`no cron job found for promotion with id ${id}`);
-      }
+  async stopPromotion(promotionId) {
+    const cronJob = this.cronJobs[promotionId];
+    if (!cronJob) {
+      throw new Error(`no cron job found for promotion with id ${promotionId}`);
+    }
 
+    try {
       cronJob.stop();
-      delete this.cronJobs[args.id];
+      delete this.cronJobs[promotionId];
     } catch (error) {
-      throw new Error("error stopping promotion cron:", error);
+      throw new Error(`error stopping promotion cron: ${error}`);
     }
   }
 
@@ -100,16 +119,15 @@ class PromotionService {
       promotion.channel_id.forEach(async (channelId, i) => {
         const channel = this.bot.client.channels.cache.get(channelId);
         if (!channel) {
-          throw new Error(`Channel with id ${channelId} not found`);
+          throw new Error(`channel with id ${channelId} not found`);
         }
 
         setTimeout(async () => {
           await channel.send(promotion.message);
-          console.log(`processing promotion with id ${promotion.id}`);
         }, i * (promotion.interval * 1000));
       });
     } catch (error) {
-      console.error("error processing promotion:", error);
+      throw new Error(`error processing promotion: ${error}`);
     }
   }
 

@@ -9,13 +9,28 @@ export default async (bot, message) => {
 
   const getCommand = bot.client.commands.get(command);
   if (getCommand === undefined) {
-    sendEmbed(message, "command not found");
-    return;
+    return sendEmbed(
+      message,
+      `command '${command}' not found. use '${bot.prefix}help' for a list of available commands`
+    );
+  }
+
+  if (getCommand.params && args.length === 0) {
+    const optionalParams = getCommand.params.some((param) =>
+      param.split("").includes("?")
+    );
+
+    if (!optionalParams) {
+      return sendEmbed(
+        message,
+        `invalid parameters for command '${command}'\nusage: '${getCommand.name}' [${getCommand.params}]`
+      );
+    }
   }
 
   try {
     await getCommand.execute(bot, message, args);
   } catch (error) {
-    sendEmbed(message, `error executing command '${command}': ${error}`);
+    sendEmbed(message, `error executing command '${command}'\n${error}`);
   }
 };

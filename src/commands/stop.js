@@ -11,13 +11,20 @@ export default {
       return;
     }
 
+    let stoppedPromotion = [];
     const data = await bot.service.getAllPromotion();
     data.forEach(async (item) => {
-      await bot.service.stopPromotion(item.id);
+      try {
+        await bot.service.stopPromotion(item.id);
+        stoppedPromotion.push(item.id);
+      } catch (error) {
+        return;
+      }
     });
-    sendEmbed(
-      message,
-      `stopped promotion with id: ${data.map((item) => item.id)}`
-    );
+
+    if (stoppedPromotion.length === 0) {
+      throw new Error("no promotion started");
+    }
+    sendEmbed(message, `stopped promotion with id: ${stoppedPromotion}`);
   },
 };

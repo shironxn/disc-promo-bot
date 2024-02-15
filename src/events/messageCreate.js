@@ -31,6 +31,9 @@ export default async (bot, message) => {
   try {
     await getCommand.execute(bot, message, args);
   } catch (error) {
-    sendEmbed(message, `error executing command '${command}'\n${error}`);
+    sendEmbed(
+      message,
+      `error executing command '${command}'\nerror: ${error.message || error}`
+    );
   }
 };

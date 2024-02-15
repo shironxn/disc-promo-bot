@@ -1,6 +1,6 @@
 # DISCORD PROMOTION SELFBOT
 
-![Logo](https://i.pinimg.com/originals/b2/2a/a2/b22aa22b2f3f55b6468361158d52e2e7.gif)
+<img src="https://i.pinimg.com/originals/b2/2a/a2/b22aa22b2f3f55b6468361158d52e2e7.gif" width="100%"></img>
 
 This project is a Discord selfbot designed to automatically manage promotions and advertising within Discord servers.
 

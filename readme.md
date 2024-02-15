@@ -1,8 +1,8 @@
-# DISCORD PROMOTION SELFBOT
+# DISCORD AUTO PROMOTION SELFBOT
 
 <img src="https://i.pinimg.com/originals/b2/2a/a2/b22aa22b2f3f55b6468361158d52e2e7.gif" width="100%"></img>
 
-This project is a Discord selfbot designed to automatically manage promotions and advertising within Discord servers.
+This project is a Discord selfbot designed to automatically manage promotions and advertising within Discord servers. It provides a convenient solution for users to schedule and automate promotional activities, ensuring efficient and timely dissemination of information across Discord communities.
 
 ## Warning
 
@@ -53,7 +53,7 @@ SUPABASE_ANON_KEY=
    For information on how to obtain the Supabase URL and Supabase Anon Key, refer to the [Supabase](https://supabase.com/docs/guides/api/creating-routes#api-url-and-keys).
 
 5. Database Schema
-   Copy and run `schema.sql` in your Supabase SQL editor to initialize the database schema.
+   Copy and run `src/schema/supabase.sql` in your Supabase SQL editor to initialize the database schema.
 
 ## Usage
 
